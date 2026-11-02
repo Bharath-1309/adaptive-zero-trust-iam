@@ -1,0 +1,69 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+.python-version
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python tools
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Database
+*.sqlite3
+*.db
+
+# Node.js
+node_modules/
+dist/
+build/
+.vite/
+
+# Frontend environment files
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Operating system
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Docker local overrides
+docker-compose.override.yml
+
+# Secrets and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+
