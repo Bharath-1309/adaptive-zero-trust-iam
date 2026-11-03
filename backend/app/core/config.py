@@ -1,7 +1,7 @@
 from functools import lru_cache
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -13,7 +13,14 @@ class Settings(BaseSettings):
     DATABASE_PORT: int = 5432
     DATABASE_NAME: str = "zero_trust_iam"
     DATABASE_USER: str = "iam_app"
-    DATABASE_PASSWORD: str = Field(validation_alias="IAM_APP_PASSWORD")
+    DATABASE_PASSWORD: str = Field(
+        validation_alias="IAM_APP_PASSWORD"
+    )
+
+    MIGRATOR_DATABASE_USER: str = "iam_migrator"
+    MIGRATOR_DATABASE_PASSWORD: str = Field(
+        validation_alias="IAM_MIGRATOR_PASSWORD"
+    )
 
     KEYCLOAK_URL: str = "http://localhost:8080"
     KEYCLOAK_REALM: str = "adaptive-iam"
@@ -24,14 +31,6 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
-
-    @property
-    def database_url(self) -> str:
-        return (
-            f"postgresql+psycopg://{self.DATABASE_USER}:"
-            f"{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}:"
-            f"{self.DATABASE_PORT}/{self.DATABASE_NAME}"
-        )
 
     @property
     def keycloak_issuer(self) -> str:
