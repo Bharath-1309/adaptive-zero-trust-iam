@@ -3,8 +3,12 @@ from typing import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.endpoints import permissions, roles
 from app.security.dependencies import get_current_user
-
+from app.security.authorization import get_current_db_user
+from app.models.user import User
+from app.api.v1.endpoints import policies
+from app.api.v1.endpoints import devices
 
 app = FastAPI(
     title="Adaptive Zero Trust IAM",
@@ -15,18 +19,33 @@ app = FastAPI(
     version="1.0.0",
 )
 
-
-# Allow requests from the React development server.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-    ],
-    allow_credentials=False,
-    allow_methods=["GET"],
-    allow_headers=["Authorization"],
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
+app.include_router(
+    roles.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    permissions.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    policies.router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    devices.router,
+    prefix="/api/v1"
+)
 
 @app.get("/health", tags=["Health"])
 def health_check():
@@ -36,18 +55,21 @@ def health_check():
     }
 
 
-@app.get("/auth/me", tags=["Authentication"])
-def get_authenticated_user(
+@app.get("/auth/me")
+def read_current_user(
     current_user: Annotated[
-        dict,
-        Depends(get_current_user),
+        User,
+        Depends(get_current_db_user),
     ],
 ):
     return {
         "authenticated": True,
-        "subject": current_user.get("sub"),
-        "username": current_user.get("preferred_username"),
-        "email": current_user.get("email"),
-        "authentication_level": current_user.get("acr"),
-        "audience": current_user.get("aud"),
+        "id": str(current_user.id),
+        "keycloak_subject": current_user.keycloak_subject,
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "is_active": current_user.is_active,
+        "roles": [
+            role.name for role in current_user.roles
+        ],
     }
