@@ -67,3 +67,6 @@ docker-compose.override.yml
 *.p12
 *.pfx
 
+# Geolocation databases
+*.mmdb
+data/geolocation/

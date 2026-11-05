@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "./auth/useAuth";
+import LocationMonitor from "./components/LocationMonitor";
 
 function App() {
   const {
@@ -10,7 +11,7 @@ function App() {
     getAccessToken,
   } = useAuth();
 
-  const [backendResult, setBackendResult] = useState<string>("");
+  const [backendResult, setBackendResult] = useState("");
   const [loading, setLoading] = useState(false);
 
   const testBackendAuthentication = async () => {
@@ -20,23 +21,31 @@ function App() {
     try {
       const accessToken = await getAccessToken();
 
-      const response = await fetch("http://127.0.0.1:8000/auth/me", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
+      const response = await fetch(
+        "http://127.0.0.1:8000/auth/me",
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      });
+      );
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.detail || "Backend authentication failed.");
+        throw new Error(
+          result.detail || "Backend authentication failed.",
+        );
       }
 
-      setBackendResult(JSON.stringify(result, null, 2));
+      setBackendResult(
+        JSON.stringify(result, null, 2),
+      );
     } catch (error) {
       setBackendResult(
-        error instanceof Error ? error.message : "Unknown error occurred.",
+        error instanceof Error
+          ? error.message
+          : "Unknown error occurred.",
       );
     } finally {
       setLoading(false);
@@ -44,65 +53,153 @@ function App() {
   };
 
   return (
-    <main style={{ padding: "30px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Adaptive Zero Trust IAM</h1>
+    <div className="app-shell">
 
-      <h2>Authentication Status</h2>
+      {/* Background location monitoring */}
+      <LocationMonitor />
 
-      <p>
-        <strong>Authenticated:</strong>{" "}
-        {isAuthenticated ? "Yes" : "No"}
-      </p>
+      <header className="topbar">
+        <div className="brand">
+          <div className="brand-icon">ZT</div>
 
-      <p>
-        <strong>Authentication Level:</strong>{" "}
-        {authenticationLevel ?? "Unavailable"}
-      </p>
+          <div>
+            <h1>ZeroTrust</h1>
+            <span>IDENTITY & ACCESS MANAGEMENT</span>
+          </div>
+        </div>
 
-      <h2>User Information</h2>
+        <div className="topbar-right">
+          <div className="connection-status">
+            <span className="status-dot" />
+            System Online
+          </div>
 
-      <p>
-        <strong>Username:</strong> {user?.username ?? "Unavailable"}
-      </p>
+          <button
+            className="logout-button"
+            onClick={logout}
+          >
+            Sign out
+          </button>
+        </div>
+      </header>
 
-      <p>
-        <strong>Email:</strong> {user?.email ?? "Unavailable"}
-      </p>
+      <main className="dashboard">
 
-      <p>
-        <strong>Name:</strong> {user?.name ?? "Unavailable"}
-      </p>
+        <section className="welcome-section">
+          <div>
+            <span className="eyebrow">
+              SECURITY OVERVIEW
+            </span>
 
-      <h2>Backend Authentication Test</h2>
+            <h2>Security Dashboard</h2>
 
-      <button
-        type="button"
-        onClick={testBackendAuthentication}
-        disabled={loading || !isAuthenticated}
-      >
-        {loading ? "Testing..." : "Test Backend Authentication"}
-      </button>
+            <p>
+              Monitor your identity, device and security
+              status in one place.
+            </p>
+          </div>
 
-      {backendResult && (
-        <pre
-          style={{
-            marginTop: "20px",
-            padding: "15px",
-            backgroundColor: "#f0f0f0",
-            whiteSpace: "pre-wrap",
-          }}
-        >
-          {backendResult}
-        </pre>
-      )}
+          <div className="session-badge">
+            <span className="status-dot" />
+            Active Session
+          </div>
+        </section>
 
-      <br />
-      <br />
+        <section className="overview-grid">
 
-      <button type="button" onClick={logout}>
-        Logout
-      </button>
-    </main>
+          <div className="info-card identity-card">
+            <div className="card-heading">
+              <div className="card-icon purple-icon">
+                ◈
+              </div>
+
+              <span className="card-label">
+                IDENTITY
+              </span>
+
+              <span className="verified-badge">
+                Verified
+              </span>
+            </div>
+
+            <h3>
+              {user?.name || user?.username || "User"}
+            </h3>
+
+            <p className="muted-text">
+              {user?.email || "Email unavailable"}
+            </p>
+
+            <div className="card-divider" />
+
+            <div className="detail-row">
+              <span>Authentication</span>
+
+              <strong>
+                {isAuthenticated
+                  ? "Authenticated"
+                  : "Not authenticated"}
+              </strong>
+            </div>
+
+            <div className="detail-row">
+              <span>MFA Level</span>
+
+              <strong>
+                {authenticationLevel === "2"
+                  ? "Level 2 · MFA"
+                  : authenticationLevel || "Unavailable"}
+              </strong>
+            </div>
+          </div>
+
+          <div className="info-card backend-card">
+            <div className="card-heading">
+              <div className="card-icon blue-icon">
+                ⌘
+              </div>
+
+              <span className="card-label">
+                BACKEND
+              </span>
+            </div>
+
+            <h3>API Authentication</h3>
+
+            <p className="muted-text">
+              Verify your authenticated session with the
+              FastAPI backend.
+            </p>
+
+            <button
+              className="secondary-button"
+              onClick={testBackendAuthentication}
+              disabled={loading || !isAuthenticated}
+            >
+              {loading
+                ? "Verifying..."
+                : "Verify Connection →"}
+            </button>
+
+            {backendResult && (
+              <pre className="result-code">
+                {backendResult}
+              </pre>
+            )}
+          </div>
+
+        </section>
+
+        <footer className="dashboard-footer">
+          <span>Adaptive Zero Trust IAM</span>
+
+          <span>
+            Identity · Context · Continuous Verification
+          </span>
+        </footer>
+
+      </main>
+    </div>
   );
 }
 

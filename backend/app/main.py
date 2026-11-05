@@ -9,6 +9,13 @@ from app.security.authorization import get_current_db_user
 from app.models.user import User
 from app.api.v1.endpoints import policies
 from app.api.v1.endpoints import devices
+from app.api.v1.endpoints import locations
+from app.api.v1.endpoints import audit_logs
+from app.api.v1.endpoints import risk_assessments
+from app.api.v1.endpoints import office_geofences
+from app.api.v1.endpoints import resource_definitions
+from app.api.v1.endpoints import access_decisions
+from app.api.v1.endpoints import travel_authorizations
 
 app = FastAPI(
     title="Adaptive Zero Trust IAM",
@@ -17,13 +24,17 @@ app = FastAPI(
         "with Geolocation-Based Risk Assessment"
     ),
     version="1.0.0",
+    swagger_ui_init_oauth={
+        "clientId": "adaptive-iam-frontend",
+        "usePkceWithAuthorizationCodeGrant": True,
+    },
 )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "DELETE"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -45,6 +56,41 @@ app.include_router(
 app.include_router(
     devices.router,
     prefix="/api/v1"
+)
+
+app.include_router(
+    locations.router,
+    prefix="/api/v1"
+)
+
+app.include_router(
+    audit_logs.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    risk_assessments.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    office_geofences.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    resource_definitions.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    access_decisions.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    travel_authorizations.router,
+    prefix="/api/v1",
 )
 
 @app.get("/health", tags=["Health"])

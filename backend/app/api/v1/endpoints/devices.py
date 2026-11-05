@@ -29,7 +29,7 @@ router = APIRouter(
 )
 
 DEVICE_COOKIE_NAME = "zt_device_token"
-DEVICE_COOKIE_PATH = "/api/v1/devices"
+DEVICE_COOKIE_PATH = "/api/v1"
 DEVICE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
 
@@ -63,6 +63,11 @@ def register_device(
 
     db.commit()
     db.refresh(device)
+
+    response.delete_cookie(
+        key=DEVICE_COOKIE_NAME,
+        path=DEVICE_COOKIE_PATH,
+    )
 
     response.set_cookie(
         key=DEVICE_COOKIE_NAME,

@@ -62,6 +62,35 @@ class AuditLogRepository:
         )
         return list(self.db.scalars(statement).all())
 
+    def get_all(
+        self,
+        offset: int = 0,
+        limit: int = 50,
+        event_type: str | None = None,
+        outcome: str | None = None,
+    ) -> list[AuditLog]:
+
+        statement = select(AuditLog)
+
+        if event_type:
+            statement = statement.where(
+                AuditLog.event_type == event_type
+            )
+
+        if outcome:
+            statement = statement.where(
+                AuditLog.outcome == outcome
+            )
+
+        statement = (
+            statement
+            .order_by(AuditLog.occurred_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+
+        return list(self.db.scalars(statement).all())
+
     def get_by_outcome(
         self,
         outcome: str,

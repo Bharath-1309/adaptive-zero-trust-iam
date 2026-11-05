@@ -1,23 +1,35 @@
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import OAuth2AuthorizationCodeBearer
 from jwt.exceptions import InvalidTokenError, PyJWKClientError
 
+from app.core.config import settings
 from app.security.jwt import decode_access_token
 
 
-bearer_scheme = HTTPBearer(auto_error=False)
+oauth2_scheme = OAuth2AuthorizationCodeBearer(
+    authorizationUrl=(
+        f"{settings.keycloak_issuer}"
+        "/protocol/openid-connect/auth"
+    ),
+    tokenUrl=(
+        f"{settings.keycloak_issuer}"
+        "/protocol/openid-connect/token"
+    ),
+    scopes={},
+    auto_error=False,
+)
 
 
 def get_current_user(
-    credentials: Annotated[
-        HTTPAuthorizationCredentials | None,
-        Depends(bearer_scheme),
+    token: Annotated[
+        str | None,
+        Depends(oauth2_scheme),
     ],
 ) -> dict:
 
-    if credentials is None:
+    if token is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication credentials are required.",
@@ -25,9 +37,7 @@ def get_current_user(
         )
 
     try:
-        payload = decode_access_token(credentials.credentials)
-
-        return payload
+        return decode_access_token(token)
 
     except InvalidTokenError:
         raise HTTPException(

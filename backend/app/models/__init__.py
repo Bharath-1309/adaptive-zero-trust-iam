@@ -12,7 +12,10 @@ from app.models.audit_log import AuditLog
 from app.models.step_up_challenge import StepUpChallenge
 from app.models.privileged_access_request import PrivilegedAccessRequest
 from app.models.privileged_access_grant import PrivilegedAccessGrant
-
+from app.models.office_geofence import OfficeGeofence
+from app.models.resource_definition import ResourceDefinition
+from app.models.travel_authorization import TravelAuthorization
+from app.models.vpn_session import VPNSession
 
 __all__ = [
     "User",
@@ -30,4 +33,8 @@ __all__ = [
     "PrivilegedAccessGrant",
     "user_roles",
     "role_permissions",
+    "OfficeGeofence",
+    "ResourceDefinition",
+    "TravelAuthorization",
+    "VPNSession",
 ]
