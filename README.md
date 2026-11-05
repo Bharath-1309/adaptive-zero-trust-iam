@@ -1,142 +1,211 @@
 ﻿# Adaptive Zero Trust Identity and Access Management
 
-## Project Overview
+### With Geolocation-Based Risk Assessment
 
-Adaptive Zero Trust Identity and Access Management with Geolocation-Based Risk Assessment.
+An adaptive cybersecurity system implementing Zero Trust security principles through identity verification, role-based and attribute-based access control, device trust, geolocation awareness, and contextual risk assessment.
 
-This is a final-year B.Tech Cybersecurity Engineering project focused on implementing a centralized and adaptive Identity and Access Management (IAM) system based on Zero Trust security principles.
+---
 
-The system evaluates user identity, permissions, device information, geolocation, authentication context and contextual risk before granting access to protected resources.
+## 1. Overview
 
-## Approved Project Objectives
+Traditional access control systems often rely on predefined permissions and assume that authenticated users can be trusted.
 
-1. To Design a centralized and secure Identity and Access Management (IAM) architecture based on Zero Trust principles.
+This project explores an adaptive Zero Trust approach in which access requests are evaluated using multiple contextual factors rather than relying solely on successful authentication.
 
-2. To Develop a user authentication and Role-Based Access Control (RBAC) system for managing user identities and permissions.
+The system is designed around the principle:
 
-3. To Implement adaptive access control to improve security through context-aware access evaluation and permission verification.
+**Never Trust, Always Verify.**
 
-## Technology Stack
+Every access request should be evaluated based on identity, permissions, device information, location context, and associated risk.
+
+## 2. Project Objectives
+
+- Implement identity-centric access control.
+- Integrate centralized authentication.
+- Enforce Role-Based Access Control (RBAC).
+- Implement Attribute-Based Access Control (ABAC).
+- Evaluate device trust before granting access.
+- Incorporate geolocation-based access assessment.
+- Identify suspicious or unusual access patterns.
+- Maintain audit records of access-related activities.
+- Support adaptive authorization decisions based on contextual risk.
+
+## 3. Key Features
+
+The project is being developed with the following capabilities:
+
+- **Centralized Authentication:** Keycloak integration for identity management and authentication.
+- **Role-Based Access Control (RBAC):** Restricts access according to assigned user roles and permissions.
+- **Attribute-Based Access Control (ABAC):** Evaluates contextual attributes when making authorization decisions.
+- **Device Trust:** Incorporates device information into access evaluation.
+- **Geolocation Assessment:** Uses location-related information to support contextual access decisions.
+- **Geofencing:** Supports office-location boundaries and geofence-based evaluation.
+- **Risk Assessment:** Evaluates contextual factors associated with access requests.
+- **Travel Authorization:** Supports temporary travel-related authorization.
+- **VPN Session Management:** Provides functionality for tracking VPN-related sessions.
+- **Audit Logging:** Records relevant security and access activities.
+- **Resource-Based Authorization:** Supports access policies associated with protected resources.
+
+These capabilities are under active development and integration.
+
+## 4. Technology Stack
 
 | Component | Technology |
 |---|---|
-| Frontend | React, TypeScript, Vite |
-| Styling | Tailwind CSS |
-| Backend | Python 3.13, FastAPI |
-| ORM | SQLAlchemy 2.x |
-| Migrations | Alembic |
-| Validation | Pydantic |
-| Identity Provider | Keycloak |
-| Authentication | OpenID Connect / OAuth 2.0 |
-| Token Format | JWT |
+| Backend | Python, FastAPI |
+| Frontend | React, TypeScript |
 | Database | PostgreSQL |
-| Geolocation | MaxMind GeoLite2 |
-| Optional GPS | Browser Geolocation API |
-| Maps | Leaflet, OpenStreetMap |
-| Authorization | RBAC + ABAC |
-| Risk Engine | Python-based explainable rule engine |
-| Deployment | Docker Compose |
+| ORM | SQLAlchemy |
+| Database Migrations | Alembic |
+| Identity Provider | Keycloak |
+| Authentication | JWT |
+| Frontend Styling | CSS |
+| Version Control | Git and GitHub |
 
-## Core Modules
+## 5. System Architecture
 
-1. Centralized Identity Management
-2. Keycloak Authentication
-3. JWT Validation
-4. Role-Based Access Control
-5. Attribute-Based Access Control
-6. Device Recognition
-7. IP-Based Geolocation
-8. Optional Browser GPS
-9. Explainable Risk Assessment
-10. Login-Level Adaptive Evaluation
-11. Sensitive-Action Risk Evaluation
-12. Step-Up Multi-Factor Authentication
-13. Security Audit Logging
-14. Security Monitoring and Dashboard
-15. Privileged Access Management
+The application follows a frontend-backend architecture.
 
-## Database Architecture
+```text
+             User
+               |
+               v
+       React Frontend
+               |
+               v
+        FastAPI Backend
+               |
+       +-------+--------+
+       |                |
+       v                v
+  Keycloak         Authorization
+ Authentication       Engine
+                          |
+              +-----------+-----------+
+              |           |           |
+              v           v           v
+            RBAC         ABAC      Device Trust
+              |           |           |
+              +-----------+-----------+
+                          |
+                          v
+                 Risk Assessment
+                          |
+                          v
+                Access Decision
+                          |
+                 +--------+--------+
+                 |                 |
+                 v                 v
+              Allow              Deny
+                 |
+                 v
+             PostgreSQL
+                 |
+                 v
+             Audit Logs
+```
 
-The application database contains exactly 15 tables:
+*Conceptual architecture; implementation and integration are ongoing.*
 
-### Identity and RBAC
-- users
-- roles
-- permissions
-- user_roles
-- role_permissions
+## 6. Zero Trust Approach
 
-### Device and Authentication
-- devices
-- login_events
-- location_observations
+The system explores contextual access evaluation using multiple security factors:
 
-### Risk and Authorization
-- risk_assessments
-- access_decisions
-- access_policies
+1. Identity verification.
+2. User role and permissions.
+3. User and resource attributes.
+4. Device trust information.
+5. Geolocation context.
+6. Risk assessment.
+7. Authorization decision.
 
-### Security and Authentication Challenges
-- audit_logs
-- step_up_challenges
+The objective is to make access decisions based on the security context of each request.
 
-### Privileged Access Management
-- privileged_access_requests
-- privileged_access_grants
+## 7. Project Structure
 
-Keycloak uses a separate PostgreSQL database.
+```text
+adaptive-zero-trust-iam/
+│
+├── backend/
+│   ├── alembic/
+│   │   └── versions/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── v1/
+│   │   │       └── endpoints/
+│   │   ├── core/
+│   │   ├── models/
+│   │   ├── repositories/
+│   │   ├── schemas/
+│   │   ├── security/
+│   │   └── services/
+│   └── requirements.txt
+│
+├── frontend/
+│   └── src/
+│       ├── components/
+│       ├── App.tsx
+│       ├── index.css
+│       └── main.tsx
+│
+├── .gitignore
+└── README.md
+```
 
-## Security Principles
+## 8. Development Status
 
-- Never trust by default.
-- Verify identity before granting access.
-- Enforce backend authorization.
-- Require RBAC permission verification.
-- Evaluate ABAC policies.
-- Assess contextual security risk.
-- Require step-up MFA when applicable.
-- Reauthorize sensitive operations.
-- Maintain security audit history.
-- Apply least privilege.
+**Project Status: Active Development**
 
-## Implementation Roadmap
+The project is being developed incrementally.
 
-1. Database schema and relationships
-2. Project directory and development environment
-3. Docker Compose and PostgreSQL
-4. Keycloak configuration
-5. FastAPI and JWT integration
-6. RBAC implementation
-7. ABAC implementation
-8. IP geolocation
-9. Optional browser GPS
-10. Device recognition
-11. Risk engine
-12. Login-level risk evaluation
-13. Sensitive-action risk evaluation
-14. Step-up MFA
-15. Audit logging and monitoring
-16. React frontend
-17. Frontend and backend integration
-18. Functional and security testing
-19. Privileged Access Management
-20. Documentation and demonstration
+Current development areas include:
 
-## Development Status
+- Backend API development.
+- Database models and migrations.
+- Authentication and authorization.
+- RBAC and ABAC implementation.
+- Device trust evaluation.
+- Geolocation and geofencing.
+- Contextual risk assessment.
+- Audit logging.
+- Frontend integration.
 
-Current phase: Phase 2 - Project Directory and Development Environment.
+Further integration, testing, security validation, and improvements are ongoing.
 
-Database specification: Finalized.
+## 9. Future Enhancements
 
-Implementation: In progress.
+Potential future improvements include:
 
-## Repository
+- Advanced adaptive risk scoring.
+- Real-time security monitoring.
+- Improved suspicious-location detection.
+- Enhanced device posture verification.
+- Automated security alerts.
+- Comprehensive security testing.
+- Detailed administrative monitoring dashboard.
+- Improved explainability of access decisions.
 
-GitHub: https://github.com/Bharath-1309
+## 10. Security
 
-## Developer
+This project is intended for educational and research purposes.
 
-Bharath_D_S
+- Never commit environment variables or credentials.
+- Store sensitive configuration outside source code.
+- Use appropriate authentication and authorization controls.
+- Validate access decisions before deployment.
+- Do not use the application in production without appropriate security testing.
 
-B.Tech - Cybersecurity Engineering
+## 11. Author
 
+**Bharath D S**
+
+B.Tech – Cyber Security Engineering
+
+GM University
+
+GitHub: [@Bharath-1309](https://github.com/Bharath-1309)
+
+## 12. License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
