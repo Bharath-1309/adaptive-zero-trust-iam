@@ -36,6 +36,10 @@ class Settings(BaseSettings):
 
     DEMO_LOCATION_SIMULATION_ENABLED: bool = False
 
+    # Adaptive MFA / step-up authentication.
+    STEP_UP_REQUIRED_ACR: int = 2
+    STEP_UP_MAX_AGE_SECONDS: int = 300
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

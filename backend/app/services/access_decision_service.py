@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.models.access_decision import AccessDecision
 from app.models.user import User
 
@@ -28,6 +29,10 @@ from app.repositories.travel_authorization_repository import (
     TravelAuthorizationRepository,
 )
 
+from app.security.assurance import (
+    is_step_up_satisfied,
+    parse_acr_level,
+)
 from app.services.abac_service import ABACService
 from app.services.audit_service import AuditService
 from app.services.authorization_service import AuthorizationService
@@ -83,6 +88,7 @@ class AccessDecisionService:
         action: str,
         resource_name: str,
         device_token: str | None = None,
+        token_claims: dict | None = None,
     ) -> AccessDecision:
 
         request_id = uuid.uuid4()
@@ -421,9 +427,23 @@ class AccessDecisionService:
                 },
             )
 
+        # Authentication strength proven by the verified token.
+        token_acr_level = parse_acr_level(
+            (token_claims or {}).get("acr")
+        )
+
+        step_up_satisfied = is_step_up_satisfied(
+            token_claims=token_claims,
+            required_level=settings.STEP_UP_REQUIRED_ACR,
+            max_age_seconds=settings.STEP_UP_MAX_AGE_SECONDS,
+        )
+
+        required_acr = None
+
         # Adaptive risk and device decisions.
         if risk_level == "CRITICAL" or risk_score >= 80:
 
+            # Critical risk is never overridden by MFA.
             decision = "DENY"
             reason = "Critical security risk detected."
 
@@ -433,11 +453,19 @@ class AccessDecisionService:
             or device_status != "TRUSTED"
         ):
 
-            decision = "STEP_UP"
-            reason = (
-                "Additional authentication or device verification "
-                "is required."
-            )
+            if step_up_satisfied:
+                decision = "ALLOW"
+                reason = (
+                    "Step-up authentication completed; "
+                    "all Zero Trust security checks passed."
+                )
+            else:
+                decision = "STEP_UP"
+                required_acr = str(settings.STEP_UP_REQUIRED_ACR)
+                reason = (
+                    "Additional authentication or device verification "
+                    "is required."
+                )
 
         else:
 
@@ -466,6 +494,9 @@ class AccessDecisionService:
                     travel_authorization_verified
                 ),
                 "corporate_vpn_verified": corporate_vpn_verified,
+                "token_acr": token_acr_level,
+                "step_up_satisfied": step_up_satisfied,
+                "required_acr": required_acr,
             },
         )
 
@@ -522,6 +553,8 @@ class AccessDecisionService:
             details={
                 "decision_id": str(access_decision.id),
                 "reason": reason,
+                "required_acr": snapshot.get("required_acr"),
+                "token_acr": snapshot.get("token_acr"),
                 "risk_score": (
                     float(risk_assessment.risk_score)
                     if risk_assessment is not None

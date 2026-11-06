@@ -17,6 +17,7 @@ from app.schemas.access_decision import (
     AccessDecisionResponse,
 )
 from app.security.authorization import get_current_db_user
+from app.security.dependencies import get_current_user
 from app.services.access_decision_service import (
     AccessDecisionService,
 )
@@ -39,6 +40,10 @@ def evaluate_access(
         User,
         Depends(get_current_db_user),
     ],
+    token_claims: Annotated[
+        dict,
+        Depends(get_current_user),
+    ],
     db: Annotated[
         Session,
         Depends(get_db),
@@ -56,12 +61,20 @@ def evaluate_access(
             action=request.action,
             resource_name=request.resource,
             device_token=device_token,
+            token_claims=token_claims,
         )
 
         db.commit()
         db.refresh(decision)
 
-        return decision
+        response = AccessDecisionResponse.model_validate(decision)
+
+        if decision.decision == "STEP_UP":
+            response.required_acr = decision.policy_snapshot.get(
+                "required_acr"
+            )
+
+        return response
 
     except ValueError as exc:
         db.rollback()

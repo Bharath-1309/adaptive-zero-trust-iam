@@ -69,9 +69,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
   }, []);
 
-  const login = () => {
+   const login = () => {
+    void keycloak.login();
+  };
+
+  // Called only when the backend returns STEP_UP. The backend tells us
+  // which authentication level it needs (required_acr); Keycloak then
+  // runs the matching flow (level 2 = password + OTP).
+  const stepUp = (requiredAcr: string) => {
     void keycloak.login({
-      acrValues: "2",
+      acrValues: requiredAcr,
+      redirectUri: window.location.href,
     });
   };
 
@@ -100,6 +108,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       value={{
         ...authState,
         login,
+        stepUp,
         logout,
         getAccessToken,
       }}

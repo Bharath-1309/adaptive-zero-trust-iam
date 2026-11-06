@@ -11,24 +11,15 @@ async function initializeApp() {
       checkLoginIframe: false,
     });
 
+    // Normal sign-in only. Stronger authentication (MFA) is requested
+    // later, and only when the backend returns a STEP_UP decision.
     if (!authenticated) {
-      await keycloak.login({
-        acrValues: "2",
-      });
+      await keycloak.login();
       return;
     }
-
-    const authenticationLevel = keycloak.tokenParsed?.acr;
 
     console.log("Keycloak authenticated:", keycloak.authenticated);
-    console.log("Authentication level (acr):", authenticationLevel);
-
-    if (authenticationLevel !== "2") {
-      await keycloak.login({
-        acrValues: "2",
-      });
-      return;
-    }
+    console.log("Authentication level (acr):", keycloak.tokenParsed?.acr);
 
     createRoot(document.getElementById("root")!).render(
       <AuthProvider>

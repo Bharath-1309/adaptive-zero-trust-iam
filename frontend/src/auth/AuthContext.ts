@@ -14,6 +14,7 @@ export interface AuthContextType {
   user: AuthUser | null;
   authenticationLevel: string | undefined;
   login: () => void;
+  stepUp: (requiredAcr: string) => void;
   logout: () => void;
   getAccessToken: () => Promise<string>;
 }

@@ -32,3 +32,7 @@ class AccessDecisionResponse(BaseModel):
     policy_snapshot: dict
     reason: str
     evaluated_at: datetime
+
+    # Set only when decision == "STEP_UP": the authentication level
+    # (Keycloak `acr`) the user must reach before access is re-evaluated.
+    required_acr: str | None = None
