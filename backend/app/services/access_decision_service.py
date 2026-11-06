@@ -81,6 +81,10 @@ class AccessDecisionService:
 
         self.geofence_evaluator = GeofenceEvaluator()
         self.audit_service = AuditService(db)
+        
+        # Authentication level of the current request's token, recorded
+        # on every decision (including early DENY results).
+        self._token_acr: int | None = None
 
     def evaluate(
         self,
@@ -92,6 +96,10 @@ class AccessDecisionService:
     ) -> AccessDecision:
 
         request_id = uuid.uuid4()
+        
+        self._token_acr = parse_acr_level(
+            (token_claims or {}).get("acr")
+        )
 
         action = action.strip()
         resource_name = resource_name.strip()
@@ -462,10 +470,17 @@ class AccessDecisionService:
             else:
                 decision = "STEP_UP"
                 required_acr = str(settings.STEP_UP_REQUIRED_ACR)
-                reason = (
-                    "Additional authentication or device verification "
-                    "is required."
-                )
+
+                if token_acr_level >= settings.STEP_UP_REQUIRED_ACR:
+                    reason = (
+                        "Previous MFA has expired; "
+                        "fresh step-up authentication is required."
+                    )
+                else:
+                    reason = (
+                        "Additional authentication or device "
+                        "verification is required."
+                    )
 
         else:
 
@@ -512,7 +527,8 @@ class AccessDecisionService:
         extra_snapshot: dict | None = None,
     ) -> AccessDecision:
 
-        snapshot = extra_snapshot or {}
+        snapshot = dict(extra_snapshot or {})
+        snapshot.setdefault("token_acr", self._token_acr)
 
         access_decision = AccessDecision(
             request_id=request_id,

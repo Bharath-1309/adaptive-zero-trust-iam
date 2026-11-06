@@ -21,4 +21,11 @@ class AuditLogResponse(BaseModel):
     country: str | None
     location_source: str | None
 
+    # Safe, fixed subset of the stored event details.
+    request_id: UUID | None = None
+    reason: str | None = None
+    risk_score: float | None = None
+    token_acr: int | None = None
+    required_acr: str | None = None
+
     occurred_at: datetime

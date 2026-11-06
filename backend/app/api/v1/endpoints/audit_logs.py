@@ -71,6 +71,11 @@ def get_audit_logs(
                     details.get("location_source")
                     or (details.get("location") or {}).get("source")
                 ),
+                request_id=log.request_id,
+                reason=details.get("reason"),
+                risk_score=details.get("risk_score"),
+                token_acr=details.get("token_acr"),
+                required_acr=details.get("required_acr"),
                 occurred_at=log.occurred_at,
             )
         )
