@@ -1,6 +1,8 @@
+from datetime import datetime
 from typing import Annotated
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -26,8 +28,22 @@ def get_audit_logs(
     offset: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
     event_type: str | None = Query(None, min_length=1, max_length=100),
-    outcome: str | None = Query(None, min_length=1, max_length=30),
+        outcome: str | None = Query(None, min_length=1, max_length=30),
+    actor_user_id: UUID | None = Query(None),
+    request_id: UUID | None = Query(None),
+    occurred_after: datetime | None = Query(None),
+    occurred_before: datetime | None = Query(None),
 ):
+    if (
+        occurred_after
+        and occurred_before
+        and occurred_after >= occurred_before
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="occurred_after must be earlier than occurred_before.",
+        )
+
     repository = AuditLogRepository(db)
 
     audit_logs = repository.get_all(
@@ -35,6 +51,10 @@ def get_audit_logs(
         limit=limit,
         event_type=event_type,
         outcome=outcome,
+        actor_user_id=actor_user_id,
+        request_id=request_id,
+        occurred_after=occurred_after,
+        occurred_before=occurred_before,
     )
 
     results = []

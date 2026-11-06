@@ -66,11 +66,35 @@ class AuditLogRepository:
         self,
         offset: int = 0,
         limit: int = 50,
-        event_type: str | None = None,
+                event_type: str | None = None,
         outcome: str | None = None,
+        actor_user_id: uuid.UUID | None = None,
+        request_id: uuid.UUID | None = None,
+        occurred_after: datetime | None = None,
+        occurred_before: datetime | None = None,
     ) -> list[AuditLog]:
 
         statement = select(AuditLog)
+
+        if actor_user_id:
+            statement = statement.where(
+                AuditLog.actor_user_id == actor_user_id
+            )
+
+        if request_id:
+            statement = statement.where(
+                AuditLog.request_id == request_id
+            )
+
+        if occurred_after:
+            statement = statement.where(
+                AuditLog.occurred_at >= occurred_after
+            )
+
+        if occurred_before:
+            statement = statement.where(
+                AuditLog.occurred_at < occurred_before
+            )
 
         if event_type:
             statement = statement.where(
